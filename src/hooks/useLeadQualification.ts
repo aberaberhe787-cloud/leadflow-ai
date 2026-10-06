@@ -163,16 +163,6 @@ export function useLeadQualification() {
           if (nextIndex < steps.length) {
             setCurrentStepIndex(nextIndex);
             const nextStep = steps[nextIndex];
-            const history = [
-              ...messages.map((m) => ({ role: m.role, content: m.content })),
-              { role: 'user', content: input },
-            ];
-            const reply = await generateAssistantReply(
-              input,
-              history,
-              stage,
-              updatedLead
-            );
             // Prefer structured next question
             addMessage({
               role: 'assistant',

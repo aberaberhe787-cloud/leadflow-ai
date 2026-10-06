@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import type { LeadData } from '../types/lead';
 import { CONTACT_METHODS } from '../data/qualificationQuestions';
 import { User, Mail, Building2, Globe, Phone } from 'lucide-react';
@@ -46,7 +46,7 @@ export function LeadCaptureForm({
   const field = (
     key: keyof typeof form,
     label: string,
-    icon: React.ReactNode,
+    icon: ReactNode,
     type = 'text',
     placeholder = ''
   ) => (

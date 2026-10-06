@@ -97,7 +97,7 @@ export function ChatWindow({
             className="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 transition disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
             aria-label="Send message"
           >
-            <Send className="w-4.5 h-4.5" />
+            <Send className="w-4 h-4" />
           </button>
         </form>
       </div>

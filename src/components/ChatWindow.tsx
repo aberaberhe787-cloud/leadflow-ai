@@ -70,8 +70,8 @@ export function ChatWindow({
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggestions */}
-      {(stage === 'welcome' || stage === 'complete') && (
+      {/* Suggestions — only on welcome and after full qualification */}
+      {(stage === 'welcome' || stage === 'complete') && !isTyping && (
         <SuggestionChips
           onSelect={onSuggestedQuestion}
           disabled={isTyping}

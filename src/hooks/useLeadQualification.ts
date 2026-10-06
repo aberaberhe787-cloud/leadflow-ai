@@ -90,18 +90,24 @@ export function useLeadQualification() {
       try {
         // Welcome stage – treat quick actions as starting qualification
         if (stage === 'welcome') {
-          const reply = await generateAssistantReply(
-            input,
-            messages.map((m) => ({ role: m.role, content: m.content })),
-            'welcome',
-            leadData
-          );
+          // Map quick-action intent without treating it as industry/business type
+          const intentMap: Record<string, string> = {
+            'Generate Leads': 'Lead Generation',
+            'Automate Support': 'Customer Support',
+            'Increase Sales': 'Sales Automation',
+            'Learn More': '',
+          };
+          const mappedChallenge = intentMap[input] ?? '';
+          if (mappedChallenge) {
+            updateLead('challenge', mappedChallenge);
+          }
+
           addMessage({
             role: 'assistant',
-            content: reply,
+            content:
+              "Great choice! Let's learn a bit about your business so I can recommend the best solution.",
             type: 'text',
           });
-          // Move to first qualification question
           setStage('qualification');
           setCurrentStepIndex(0);
           setTimeout(() => {
@@ -114,7 +120,7 @@ export function useLeadQualification() {
             });
             setIsTyping(false);
             processingRef.current = false;
-          }, 600);
+          }, 500);
           return;
         }
 

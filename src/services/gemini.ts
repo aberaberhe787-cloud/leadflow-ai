@@ -62,11 +62,9 @@ export async function generateAssistantReply(
   stage: string,
   leadData: Partial<LeadData>
 ): Promise<string> {
-  // Always try FAQ first on complete / free-form
-  if (stage === 'complete' || stage === 'recommendation') {
-    const faq = matchFaq(userMessage);
-    if (faq) return faq;
-  }
+  // Always answer known product FAQs first (any stage)
+  const faq = matchFaq(userMessage);
+  if (faq) return faq;
 
   const client = getClient();
   if (!client) {

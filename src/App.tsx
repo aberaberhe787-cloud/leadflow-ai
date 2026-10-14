@@ -9,6 +9,9 @@ function App() {
     messages,
     stage,
     isTyping,
+    currentStepIndex,
+    canSkipCurrentStep,
+    skipCurrentOptionalStep,
     processUserInput,
     handleOptionClick,
     handleSuggestedQuestion,
@@ -92,6 +95,9 @@ function App() {
             onSend={processUserInput}
             onOptionClick={handleOptionClick}
             onSuggestedQuestion={handleSuggestedQuestion}
+            onSkipOptional={skipCurrentOptionalStep}
+            canSkipCurrentStep={canSkipCurrentStep}
+            currentStepIndex={currentStepIndex}
             stage={stage}
           />
         </main>

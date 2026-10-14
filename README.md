@@ -1,101 +1,77 @@
 # LeadFlow AI
 
-**Qualify visitors automatically. Generate more leads while you focus on closing deals.**
+A React demo for guided lead qualification, business discovery, contact capture, and rule-based recommendations.
 
-A production-quality AI-powered lead generation assistant that qualifies website visitors, captures lead information, and recommends relevant solutions before handing qualified leads to a sales team.
+## Current capabilities
 
-## Features
+- Multi-stage qualification conversation
+- Contact-field validation
+- Rule-based lead-quality estimate
+- Challenge-based solution suggestion
+- Optional Gemini-backed replies through a server-side API endpoint
+- Responsive React interface
 
-- AI-driven lead qualification conversation
-- Natural multi-stage discovery flow
-- Lead capture with validation
-- Gemini-powered personalized recommendations
-- Premium dark SaaS UI
-- Fully responsive (mobile + desktop)
-- CRM-ready data structure
+**Important:** This is currently a demo. Lead details and chat history are held in browser memory and are lost when the page is refreshed. Database persistence, CRM synchronization, calendar booking, automated follow-up, and analytics are not configured.
 
-## Tech Stack
+## Tech stack
 
 - React 19 + TypeScript
 - Vite 8
 - Tailwind CSS 4
-- Google Gemini API
+- Google Gemini API (optional server-side reply endpoint)
 - Lucide React icons
 
-## Getting Started
+## Local development
 
 ```bash
-# Install dependencies
 npm install
-
-# Add your Gemini API key to .env
-# GEMINI_API_KEY=your_key_here
-# VITE_GEMINI_API_KEY=your_key_here
-
-# Run development server
 npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
 ```
 
-## Project Structure
+The Vite dev server does not execute Vercel serverless functions automatically. To test the Gemini endpoint locally, install the Vercel CLI and use `vercel dev` after configuring the server-only environment variable below.
 
-```
-src/
-├── components/
-│   ├── ChatWindow.tsx
-│   ├── MessageBubble.tsx
-│   ├── LeadCaptureForm.tsx
-│   ├── SuggestionChips.tsx
-│   └── Sidebar.tsx
-├── services/
-│   └── gemini.ts
-├── data/
-│   └── qualificationQuestions.ts
-├── types/
-│   └── lead.ts
-├── hooks/
-│   └── useLeadQualification.ts
-├── App.tsx
-├── main.tsx
-└── index.css
-```
+## Environment variables
 
-## Environment Variables
+Configure `GEMINI_API_KEY` in the server environment (for example, Vercel Project Settings → Environment Variables). **Do not use `VITE_GEMINI_API_KEY` or expose the key to browser code.** Vite-prefixed variables are bundled into client-side code.
 
-| Variable | Description |
-|----------|-------------|
-| `GEMINI_API_KEY` | Google Gemini API key |
-| `VITE_GEMINI_API_KEY` | Same key exposed to client (Vite prefix) |
-
-> **Note:** For production, prefer a backend proxy so the API key is never exposed to the client.
+The app falls back to local replies and rule-based recommendations if the API endpoint is unavailable.
 
 ## Deploy to Vercel
 
-1. Push this repo to GitHub
-2. Import the project in [Vercel](https://vercel.com)
-3. Add environment variables `GEMINI_API_KEY` and `VITE_GEMINI_API_KEY`
-4. Deploy
+1. Import this repository into Vercel.
+2. Set `GEMINI_API_KEY` as a server-side environment variable if you want Gemini-backed replies.
+3. Deploy the project and verify the `/api/gemini` endpoint in the deployment.
 
-Or via CLI:
+## Project structure
 
-```bash
-npm i -g vercel
-vercel
+```
+api/
+└── gemini.js
+src/
+├── components/
+├── data/
+├── hooks/
+├── services/
+├── types/
+├── App.tsx
+└── main.tsx
 ```
 
-## Core User Flow
+## Core user flow
 
-1. **Welcome** – Greeting + quick action chips
-2. **Qualification** – Business type, industry, volume, challenge
-3. **Discovery** – Company size, tools, audience, goals
-4. **Lead Capture** – Name, email, company, website, contact method
-5. **AI Recommendation** – Personalized summary + benefits + lead quality score
-6. **Features** – Visual feature grid
+1. Welcome and quick-action selection
+2. Business qualification
+3. Business discovery
+4. Contact capture
+5. Rule-based recommendation and feature summary
+
+## Scripts
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
 
 ## License
 

@@ -10,6 +10,9 @@ interface ChatWindowProps {
   onSend: (text: string) => void;
   onOptionClick: (option: string) => void;
   onSuggestedQuestion: (q: string) => void;
+  onSkipOptional: () => void;
+  canSkipCurrentStep: boolean;
+  currentStepIndex: number;
   stage: string;
 }
 
@@ -19,11 +22,17 @@ export function ChatWindow({
   onSend,
   onOptionClick,
   onSuggestedQuestion,
+  onSkipOptional,
+  canSkipCurrentStep,
+  currentStepIndex,
   stage,
 }: ChatWindowProps) {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const stepCounts: Record<string, number> = { qualification: 4, discovery: 4, capture: 5 };
+  const stepCount = stepCounts[stage] ?? 0;
+  const progress = stepCount ? Math.min(100, ((currentStepIndex + 1) / stepCount) * 100) : 0;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -50,6 +59,17 @@ export function ChatWindow({
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Messages area */}
+      {stepCount > 0 && (
+        <div className="px-4 sm:px-6 pt-3 pb-1 border-b border-slate-800/50" aria-label="Qualification progress">
+          <div className="flex justify-between text-xs text-slate-400 mb-2">
+            <span className="capitalize">{stage} progress</span>
+            <span>Question {Math.min(currentStepIndex + 1, stepCount)} of {stepCount}</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+            <div className="h-full rounded-full bg-indigo-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 scroll-smooth">
         {messages.map((msg) => (
           <MessageBubble
@@ -91,6 +111,15 @@ export function ChatWindow({
             disabled={isTyping}
             className="flex-1 bg-slate-800/80 border border-slate-700/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/40 transition disabled:opacity-50"
           />
+          {canSkipCurrentStep && !isTyping && (
+            <button
+              type="button"
+              onClick={onSkipOptional}
+              className="shrink-0 px-3 h-11 rounded-xl border border-slate-700 text-xs text-slate-300 hover:bg-slate-800 transition"
+            >
+              Skip
+            </button>
+          )}
           <button
             type="submit"
             disabled={!input.trim() || isTyping}

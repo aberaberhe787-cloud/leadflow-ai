@@ -3,6 +3,26 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const MAX_MESSAGE_LENGTH = 1500;
 const MAX_HISTORY_ITEMS = 8;
 const MAX_CONTEXT_VALUE_LENGTH = 250;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_REQUESTS = 30;
+// Best-effort per-instance protection. Use a shared rate limiter/WAF for production.
+const requestCounts = new Map();
+
+function isRateLimited(req) {
+  const forwardedIp = req.headers['x-vercel-forwarded-for'] || req.headers['x-real-ip'];
+  const ip = (typeof forwardedIp === 'string' ? forwardedIp.split(',')[0] : '').trim()
+    || req.socket?.remoteAddress
+    || 'unknown';
+  const now = Date.now();
+  const recent = (requestCounts.get(ip) || []).filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_REQUESTS) {
+    requestCounts.set(ip, recent);
+    return true;
+  }
+  recent.push(now);
+  requestCounts.set(ip, recent);
+  return false;
+}
 
 function boundedText(value, max = MAX_CONTEXT_VALUE_LENGTH) {
   return typeof value === 'string' ? value.slice(0, max) : '';
@@ -18,6 +38,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (isRateLimited(req)) {
+    return res.status(429).json({ error: 'Too many requests. Please try again shortly.' });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;

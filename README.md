@@ -34,7 +34,7 @@ The Vite dev server does not execute Vercel serverless functions automatically. 
 
 Configure `GEMINI_API_KEY` in the server environment (for example, Vercel Project Settings → Environment Variables). **Do not use `VITE_GEMINI_API_KEY` or expose the key to browser code.** Vite-prefixed variables are bundled into client-side code.
 
-The app falls back to local replies and rule-based recommendations if the API endpoint is unavailable.
+The app falls back to local replies and rule-based recommendations if the API endpoint is unavailable. The endpoint has best-effort per-instance throttling; before exposing it to significant public traffic, configure shared rate limiting or a WAF and monitor Gemini usage.
 
 ## Deploy to Vercel
 

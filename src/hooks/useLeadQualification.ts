@@ -80,11 +80,11 @@ export function useLeadQualification() {
   }, [stage]);
 
   const processUserInput = useCallback(
-    async (input: string) => {
-      if (processingRef.current || !input.trim()) return;
+    async (input: string, skipOptional = false) => {
+      if (processingRef.current || (!input.trim() && !skipOptional)) return;
       processingRef.current = true;
 
-      addMessage({ role: 'user', content: input, type: 'text' });
+      if (input.trim()) addMessage({ role: 'user', content: input, type: 'text' });
       setIsTyping(true);
 
       try {
@@ -128,8 +128,13 @@ export function useLeadQualification() {
         const currentStep = steps[currentStepIndex];
 
         if (currentStep) {
-          // Validate if needed
-          if (currentStep.validation) {
+          if (skipOptional && currentStep.required !== false) {
+            setIsTyping(false);
+            processingRef.current = false;
+            return;
+          }
+          // Validate non-skipped answers only.
+          if (!skipOptional && currentStep.validation) {
             const error = currentStep.validation(input);
             if (error) {
               setFormErrors((prev) => ({ ...prev, [currentStep.field]: error }));
@@ -143,7 +148,7 @@ export function useLeadQualification() {
               return;
             }
           }
-          if (currentStep.required && !input.trim()) {
+          if (!skipOptional && currentStep.required && !input.trim()) {
             addMessage({
               role: 'assistant',
               content: 'This field is required. Please provide an answer.',
@@ -154,8 +159,9 @@ export function useLeadQualification() {
             return;
           }
 
-          // Save answer
-          updateLead(currentStep.field, input);
+          // Save an empty value when an optional question is skipped.
+          const answer = skipOptional ? '' : input;
+          updateLead(currentStep.field, answer);
           setFormErrors((prev) => {
             const next = { ...prev };
             delete next[currentStep.field];
@@ -163,7 +169,7 @@ export function useLeadQualification() {
           });
 
           const nextIndex = currentStepIndex + 1;
-          const updatedLead = { ...leadData, [currentStep.field]: input };
+          const updatedLead = { ...leadData, [currentStep.field]: answer };
 
           // Still more steps in current stage
           if (nextIndex < steps.length) {
@@ -272,6 +278,14 @@ export function useLeadQualification() {
     ]
   );
 
+  const currentSteps = getCurrentSteps();
+  const currentStep = currentSteps[currentStepIndex];
+  const canSkipCurrentStep = Boolean(currentStep && currentStep.required === false);
+
+  const skipCurrentOptionalStep = useCallback(() => {
+    if (canSkipCurrentStep) void processUserInput('', true);
+  }, [canSkipCurrentStep, processUserInput]);
+
   const handleOptionClick = useCallback(
     (option: string) => {
       processUserInput(option);
@@ -314,6 +328,9 @@ export function useLeadQualification() {
     isTyping,
     recommendation,
     formErrors,
+    currentStepIndex,
+    canSkipCurrentStep,
+    skipCurrentOptionalStep,
     processUserInput,
     handleOptionClick,
     handleSuggestedQuestion,

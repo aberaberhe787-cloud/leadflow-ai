@@ -14,6 +14,11 @@ function isRateLimited(req) {
     || req.socket?.remoteAddress
     || 'unknown';
   const now = Date.now();
+  if (requestCounts.size > 5000) {
+    for (const [key, timestamps] of requestCounts) {
+      if (!timestamps.some((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS)) requestCounts.delete(key);
+    }
+  }
   const recent = (requestCounts.get(ip) || []).filter((timestamp) => now - timestamp < RATE_LIMIT_WINDOW_MS);
   if (recent.length >= RATE_LIMIT_REQUESTS) {
     requestCounts.set(ip, recent);
